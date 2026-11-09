@@ -1,0 +1,57 @@
+name: keycloak
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: local-db-password
+    volumes:
+      - keycloak-db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U keycloak -d keycloak" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.2
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: local-db-password
+
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: local-admin-password
+
+      KC_HOSTNAME: http://localhost:8080
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./keycloak/realm.json:/opt/keycloak/data/import/realm.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ./api
+    environment:
+      SERVER_PORT: 8081
+
+      # Expected "iss" claim in incoming tokens.
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/demo
+
+      # Address the API container uses to obtain public signing keys.
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/demo/protocol/openid-connect/certs
+    ports:
+      - "127.0.0.1:8081:8081"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+
+volumes:
+  keycloak-db:

@@ -1,0 +1,90 @@
+{
+  "realm": "demo",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "accessTokenLifespan": 300,
+
+  "roles": {
+    "realm": [
+      {
+        "name": "orders.read",
+        "description": "Read orders"
+      },
+      {
+        "name": "orders.write",
+        "description": "Create or modify orders"
+      }
+    ]
+  },
+
+  "clients": [
+    {
+      "clientId": "demo-api",
+      "name": "Demo API",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "bearerOnly": true
+    },
+    {
+      "clientId": "demo-worker",
+      "name": "Local background worker",
+      "enabled": true,
+      "protocol": "openid-connect",
+
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "local-worker-secret",
+
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+
+      "fullScopeAllowed": false,
+      "defaultClientScopes": [],
+
+      "protocolMappers": [
+        {
+          "name": "api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "demo-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "realm-roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "config": {
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "userinfo.token.claim": "false"
+          }
+        }
+      ]
+    }
+  ],
+
+  "scopeMappings": [
+    {
+      "client": "demo-worker",
+      "roles": ["orders.read"]
+    }
+  ],
+
+  "users": [
+    {
+      "username": "service-account-demo-worker",
+      "enabled": true,
+      "serviceAccountClientId": "demo-worker",
+      "realmRoles": ["orders.read"]
+    }
+  ]
+}
