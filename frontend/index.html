@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Orders — Keycloak SPA</title>
+    <title>Orders — Keycloak Demo</title>
 </head>
+
 <body>
 <main>
     <h1>Orders</h1>
 
-    <p id="status" role="status">Starting…</p>
+    <p id="status" role="status" aria-live="polite">
+        Starting application…
+    </p>
 
     <div class="actions">
         <button id="login" type="button" disabled>
@@ -21,8 +24,8 @@
         </button>
     </div>
 
-    <section>
-        <h2>API operations</h2>
+    <section aria-labelledby="account-heading">
+        <h2 id="account-heading">Account and orders</h2>
 
         <div class="actions">
             <button id="identity" type="button" disabled>
@@ -30,23 +33,118 @@
             </button>
 
             <button id="orders" type="button" disabled>
-                Read orders
-            </button>
-
-            <button id="create" type="button" disabled>
-                Test write permission
+                List my orders
             </button>
         </div>
 
         <p>
-            Alice can read orders. Bob can read and write.
-            The API makes the permission decision.
+            Alice can read her orders. Bob can create and read his orders.
+            The API enforces permissions and ownership.
         </p>
     </section>
 
-    <section>
-        <h2>Response</h2>
-        <pre id="output">No request yet.</pre>
+    <section aria-labelledby="create-heading">
+        <h2 id="create-heading">Create an order</h2>
+
+        <form id="create-form">
+            <fieldset id="create-fields" disabled>
+                <legend>Order details</legend>
+
+                <p>
+                    <label for="product">Product</label>
+                    <br>
+                    <input
+                            id="product"
+                            name="product"
+                            type="text"
+                            value="Mechanical keyboard"
+                            maxlength="120"
+                            required>
+                </p>
+
+                <p>
+                    <label for="quantity">Quantity</label>
+                    <br>
+                    <input
+                            id="quantity"
+                            name="quantity"
+                            type="number"
+                            value="1"
+                            min="1"
+                            max="100"
+                            step="1"
+                            required>
+                </p>
+
+                <p>
+                    <label for="request-key">Idempotency key</label>
+                    <br>
+                    <input
+                            id="request-key"
+                            name="requestKey"
+                            type="text"
+                            size="40"
+                            autocomplete="off"
+                            spellcheck="false"
+                            pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+                            aria-describedby="key-help"
+                            required>
+                </p>
+
+                <p id="key-help">
+                    Retry the same order with the same key and details.
+                    Generate a new key for a new order.
+                    Reloading this page generates a new key.
+                </p>
+
+                <div class="actions">
+                    <button type="submit">
+                        Create order
+                    </button>
+
+                    <button id="new-key" type="button">
+                        Generate new key
+                    </button>
+                </div>
+            </fieldset>
+        </form>
+    </section>
+
+    <section aria-labelledby="find-heading">
+        <h2 id="find-heading">Find an order</h2>
+
+        <form id="find-form">
+            <fieldset id="find-fields" disabled>
+                <legend>Order lookup</legend>
+
+                <p>
+                    <label for="order-id">Order ID</label>
+                    <br>
+                    <input
+                            id="order-id"
+                            name="orderId"
+                            type="text"
+                            size="40"
+                            autocomplete="off"
+                            spellcheck="false"
+                            pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+                            required>
+                </p>
+
+                <button type="submit">
+                    Find order
+                </button>
+            </fieldset>
+        </form>
+
+        <p>
+            An order belonging to another user returns 404.
+        </p>
+    </section>
+
+    <section aria-labelledby="response-heading">
+        <h2 id="response-heading">Response</h2>
+        <pre id="output" aria-live="polite">No request yet.</pre>
     </section>
 </main>
 

@@ -47,10 +47,16 @@ services:
 
       # Address the API container uses to obtain public signing keys.
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/demo/protocol/openid-connect/certs
+
+      ORDERS_DB_URL: jdbc:postgresql://orders-db:5432/orders
+      ORDERS_DB_USER: orders
+      ORDERS_DB_PASSWORD: local-orders-password
     ports:
       - "127.0.0.1:8081:8081"
     depends_on:
       keycloak:
+        condition: service_healthy
+      orders-db:
         condition: service_healthy
 
   frontend:
@@ -64,5 +70,20 @@ services:
       keycloak:
         condition: service_started
 
+  orders-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: orders
+      POSTGRES_USER: orders
+      POSTGRES_PASSWORD: local-orders-password
+    volumes:
+      - orders-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orders -d orders"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
 volumes:
   keycloak-db:
+  orders-db-data:

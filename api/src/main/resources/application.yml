@@ -5,6 +5,25 @@ spring:
   application:
     name: demo-api
 
+  datasource:
+    url: ${ORDERS_DB_URL:jdbc:postgresql://orders-db:5432/orders}
+    username: ${ORDERS_DB_USER:orders}
+    password: ${ORDERS_DB_PASSWORD:local-orders-password}
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 5000
+
+  flyway:
+    enabled: true
+
+  mvc:
+    problemdetails:
+      enabled: true
+
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+
   security:
     oauth2:
       resourceserver:

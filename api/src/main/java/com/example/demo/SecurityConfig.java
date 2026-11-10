@@ -40,7 +40,10 @@ public class SecurityConfig {
                         .requestMatchers("/public").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/me")
                         .authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/orders")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/orders",
+                                "/api/orders/*")
                         .hasAuthority("ROLE_orders.read")
                         .requestMatchers(HttpMethod.POST, "/api/orders")
                         .hasAuthority("ROLE_orders.write")
@@ -96,8 +99,17 @@ public class SecurityConfig {
                 List.of("http://localhost:3000"));
         configuration.setAllowedMethods(
                 List.of("GET", "POST", "OPTIONS"));
-        configuration.setAllowedHeaders(
-                List.of("Authorization", "Content-Type", "Accept"));
+        configuration.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Idempotency-Key"
+        ));
+
+        configuration.setExposedHeaders(List.of(
+                "Location",
+                "Idempotency-Replayed"
+        ));
 
         // API authentication uses bearer headers, not cookies.
         configuration.setAllowCredentials(false);
