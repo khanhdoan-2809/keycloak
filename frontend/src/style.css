@@ -1,0 +1,47 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #172033;
+  background: #f4f6fa;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 850px;
+  margin: 3rem auto;
+  padding: 1.5rem;
+}
+
+section {
+  margin-top: 2rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+button {
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+pre {
+  padding: 1rem;
+  overflow: auto;
+  background: #172033;
+  color: #e6edf7;
+  border-radius: 0.5rem;
+}
+
+[hidden] {
+  display: none !important;
+}

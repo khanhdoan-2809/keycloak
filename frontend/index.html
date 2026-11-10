@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Orders — Keycloak SPA</title>
+</head>
+<body>
+<main>
+    <h1>Orders</h1>
+
+    <p id="status" role="status">Starting…</p>
+
+    <div class="actions">
+        <button id="login" type="button" disabled>
+            Sign in
+        </button>
+
+        <button id="logout" type="button" hidden>
+            Sign out
+        </button>
+    </div>
+
+    <section>
+        <h2>API operations</h2>
+
+        <div class="actions">
+            <button id="identity" type="button" disabled>
+                Show identity
+            </button>
+
+            <button id="orders" type="button" disabled>
+                Read orders
+            </button>
+
+            <button id="create" type="button" disabled>
+                Test write permission
+            </button>
+        </div>
+
+        <p>
+            Alice can read orders. Bob can read and write.
+            The API makes the permission decision.
+        </p>
+    </section>
+
+    <section>
+        <h2>Response</h2>
+        <pre id="output">No request yet.</pre>
+    </section>
+</main>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
