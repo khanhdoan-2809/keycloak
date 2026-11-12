@@ -9,8 +9,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,32 +33,26 @@ public class OrderController {
 
     @GetMapping
     public List<OrderView> list(
-            @AuthenticationPrincipal Jwt identity,
-
             @RequestParam(name = "limit", defaultValue = "20")
             @Min(1) @Max(100) int limit,
 
             @RequestParam(name = "offset", defaultValue = "0")
             @Min(0) @Max(10000) int offset) {
 
-        return orders.list(identity, limit, offset);
+        return orders.list(limit, offset);
     }
 
     @GetMapping("/{id}")
-    public OrderView get(
-            @AuthenticationPrincipal Jwt identity,
-            @PathVariable("id") UUID id) {
-
-        return orders.get(identity, id);
+    public OrderView get(@PathVariable("id") UUID id) {
+        return orders.get(id);
     }
 
     @PostMapping
     public ResponseEntity<OrderView> create(
-            @AuthenticationPrincipal Jwt identity,
             @RequestHeader("Idempotency-Key") UUID key,
             @Valid @RequestBody CreateOrder request) {
 
-        var result = orders.create(identity, key, request);
+        var result = orders.create(key, request);
 
         return ResponseEntity
                 .status(result.replayed() ? 200 : 201)

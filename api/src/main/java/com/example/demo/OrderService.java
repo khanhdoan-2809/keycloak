@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,6 +17,7 @@ import com.example.demo.OrderDtos.CreateResult;
 import com.example.demo.OrderDtos.OrderView;
 
 @Service
+@PreAuthorize("denyAll()")
 public class OrderService {
 
     private static final RowMapper<OrderView> ORDER_MAPPER =
@@ -24,18 +25,26 @@ public class OrderService {
                     rs.getObject("id", UUID.class),
                     rs.getString("product"),
                     rs.getInt("quantity"),
-                    rs.getObject("created_at", OffsetDateTime.class)
+                    rs.getObject(
+                            "created_at",
+                            OffsetDateTime.class)
             );
 
     private final JdbcClient jdbc;
+    private final CurrentIdentity identity;
 
-    public OrderService(JdbcClient jdbc) {
+    public OrderService(
+            JdbcClient jdbc,
+            CurrentIdentity identity) {
+
         this.jdbc = jdbc;
+        this.identity = identity;
     }
 
+    @PreAuthorize("hasAuthority('demo-api:orders.read')")
     @Transactional
-    public List<OrderView> list(Jwt identity, int limit, int offset) {
-        UUID owner = resolveOwner(identity);
+    public List<OrderView> list(int limit, int offset) {
+        UUID owner = resolveOwner();
 
         return jdbc.sql("""
                 SELECT id, product, quantity, created_at
@@ -51,9 +60,10 @@ public class OrderService {
                 .list();
     }
 
+    @PreAuthorize("hasAuthority('demo-api:orders.read')")
     @Transactional
-    public OrderView get(Jwt identity, UUID orderId) {
-        UUID owner = resolveOwner(identity);
+    public OrderView get(UUID orderId) {
+        UUID owner = resolveOwner();
 
         return jdbc.sql("""
                 SELECT id, product, quantity, created_at
@@ -70,20 +80,14 @@ public class OrderService {
                         "Order not found"));
     }
 
+    @PreAuthorize("hasAuthority('demo-api:orders.write')")
     @Transactional(timeout = 10)
     public CreateResult create(
-            Jwt identity,
             UUID idempotencyKey,
             CreateOrder request) {
 
-        UUID owner = resolveOwner(identity);
+        UUID owner = resolveOwner();
 
-        /*
-         * Serialize creation for this owner.
-         *
-         * The lock remains held until this transaction commits.
-         * Concurrent retries cannot both pass the lookup and insert.
-         */
         jdbc.sql("""
                 SELECT id
                 FROM app_user
@@ -149,23 +153,12 @@ public class OrderService {
         return new CreateResult(created, false);
     }
 
-    private UUID resolveOwner(Jwt identity) {
-        if (identity.getIssuer() == null
-                || identity.getSubject() == null
-                || identity.getSubject().isBlank()) {
+    private UUID resolveOwner() {
+        var jwt = identity.requireJwt();
 
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED,
-                    "Token must contain an issuer and subject");
-        }
+        String issuer = jwt.getIssuer().toString();
+        String subject = jwt.getSubject();
 
-        String issuer = identity.getIssuer().toString();
-        String subject = identity.getSubject();
-
-        /*
-         * Provision the application user on first access.
-         * The unique constraint handles concurrent first requests.
-         */
         jdbc.sql("""
                 INSERT INTO app_user (
                     id,
