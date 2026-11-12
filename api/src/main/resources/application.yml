@@ -31,3 +31,10 @@ spring:
           issuer-uri: http://localhost:8080/realms/demo
           audiences:
             - demo-api
+
+app:
+  security:
+    validation-mode: ${TOKEN_VALIDATION_MODE:local}
+    introspection-uri: ${KEYCLOAK_INTROSPECTION_URI:http://keycloak:8080/realms/demo/protocol/openid-connect/token/introspect}
+    introspection-client-id: demo-api
+    introspection-client-secret: ${KEYCLOAK_INTROSPECTION_SECRET:}
