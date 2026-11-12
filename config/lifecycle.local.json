@@ -1,0 +1,21 @@
+{
+  "realm": "demo",
+  "realmSettings": {
+    "accessTokenLifespan": 60,
+    "ssoSessionIdleTimeout": 600,
+    "ssoSessionMaxLifespan": 1800,
+    "clientSessionIdleTimeout": 300,
+    "clientSessionMaxLifespan": 900,
+    "revokeRefreshToken": true,
+    "refreshTokenMaxReuse": 0
+  },
+  "clients": [
+    "demo-web",
+    "demo-postman"
+  ],
+  "clientAttributes": {
+    "access.token.lifespan": "60",
+    "client.session.idle.timeout": "300",
+    "client.session.max.lifespan": "900"
+  }
+}

@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Orders — Keycloak Demo</title>
+    <title>Orders — Authentication Lifecycle</title>
 </head>
 
 <body>
 <main>
-    <h1>Orders</h1>
+    <h1>Authentication lifecycle</h1>
 
     <p id="status" role="status" aria-live="polite">
         Starting application…
@@ -20,9 +20,55 @@
         </button>
 
         <button id="logout" type="button" hidden>
-            Sign out
+            Sign out through Keycloak
         </button>
     </div>
+
+    <section aria-labelledby="lifecycle-heading">
+        <h2 id="lifecycle-heading">Token and session lifecycle</h2>
+
+        <p>
+            Metadata below is decoded locally. It does not prove that your
+            Keycloak session is still active. The API validates tokens independently.
+            Raw tokens are never displayed here.
+        </p>
+
+        <p>
+            <label>
+                <input id="refresh-before-api" type="checkbox" checked>
+                Refresh when needed before normal API calls
+            </label>
+        </p>
+
+        <div class="actions">
+            <button id="force-refresh" type="button" disabled>
+                Force refresh now
+            </button>
+
+            <button id="raw-probe" type="button" disabled>
+                Probe API without refresh
+            </button>
+
+            <button id="clear-local" type="button" disabled>
+                Clear local tokens only
+            </button>
+        </div>
+
+        <p>
+            The raw probe always skips refresh. The countdown updates locally;
+            it does not keep your Keycloak session alive.
+        </p>
+
+        <p>
+            With default Spring settings, the API can accept a token for up to
+            60 seconds after its expiry timestamp because of clock-skew tolerance.
+        </p>
+
+        <pre id="metadata" aria-label="Local token metadata">No token metadata.</pre>
+
+        <h3>Lifecycle events</h3>
+        <pre id="events" aria-live="polite">No events yet.</pre>
+    </section>
 
     <section aria-labelledby="account-heading">
         <h2 id="account-heading">Account and orders</h2>
@@ -38,8 +84,8 @@
         </div>
 
         <p>
-            Alice can read her orders. Bob can create and read his orders.
-            The API enforces permissions and ownership.
+            Normal API calls follow the refresh checkbox above.
+            The raw probe always sends the currently held access token.
         </p>
     </section>
 
@@ -98,13 +144,8 @@
                 </p>
 
                 <div class="actions">
-                    <button type="submit">
-                        Create order
-                    </button>
-
-                    <button id="new-key" type="button">
-                        Generate new key
-                    </button>
+                    <button type="submit">Create order</button>
+                    <button id="new-key" type="button">Generate new key</button>
                 </div>
             </fieldset>
         </form>
@@ -131,19 +172,13 @@
                             required>
                 </p>
 
-                <button type="submit">
-                    Find order
-                </button>
+                <button type="submit">Find order</button>
             </fieldset>
         </form>
-
-        <p>
-            An order belonging to another user returns 404.
-        </p>
     </section>
 
     <section aria-labelledby="response-heading">
-        <h2 id="response-heading">Response</h2>
+        <h2 id="response-heading">API response</h2>
         <pre id="output" aria-live="polite">No request yet.</pre>
     </section>
 </main>

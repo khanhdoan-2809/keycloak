@@ -65,10 +65,10 @@ services:
     ports:
       - "127.0.0.1:3000:8080"
     depends_on:
-      api:
-        condition: service_started
       keycloak:
         condition: service_started
+      orders-db:
+        condition: service_healthy
 
   orders-db:
     image: postgres:17-alpine
